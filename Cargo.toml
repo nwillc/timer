@@ -7,4 +7,5 @@ edition = "2018"
 
 [dependencies]
 rust-embed="5.9.0"
-ansi_term = "0.12"
+string-builder = "0.2.0"
+termion = "1.5.6"
