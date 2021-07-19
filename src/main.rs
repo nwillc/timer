@@ -9,10 +9,12 @@ use termion::cursor;
 
 mod type_face;
 mod count_down;
+mod term;
 
 fn main() {
     let mut font_size: usize = 7;
     let mut duration: Duration = Duration::from_secs(24 * 60);
+    let mut color_name = "red";
 
     let matches = App::new("timer")
         .version("1.0")
@@ -38,7 +40,7 @@ fn main() {
                 .short("c")
                 .long("color")
                 .value_name("COLOR")
-                .help("Sets the duration of the timer (blue, cyan, green, red, white)")
+                .help("Sets the duration of the timer (blue, cyan, green, magenta, red, white, yellow)")
                 .takes_value(true),
         )
         .get_matches();
@@ -51,6 +53,10 @@ fn main() {
         duration = duration_str::parse(o).expect("invalid duration string");
     }
 
+    if let Some(o) = matches.value_of("color") {
+        color_name = o;
+    }
+
     ctrlc::set_handler(move || {
         print!("{}", cursor::Show);
         process::exit(0x0);
@@ -59,15 +65,18 @@ fn main() {
 
     let font_lib = type_face::FontLibrary::new();
     let a_second = Duration::from_secs(1);
+    let c = term::get_color(color_name);
     let mut timer = count_down::Timer::new(duration.as_secs());
     timer.start();
+
     loop {
-        type_face::clear();
-        type_face::display(timer.to_string().as_str(), font_size, &font_lib);
+        term::clear();
+        type_face::display(timer.to_string().as_str(), font_size, &c, &font_lib);
         if timer.as_secs() == 0 {
             break;
         }
         sleep(a_second);
     }
+
     print!("{}", cursor::Show);
 }

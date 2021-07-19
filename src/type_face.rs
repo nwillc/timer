@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use rust_embed::RustEmbed;
-use termion::{color,clear,cursor};
+use termion::color;
 
 #[derive(RustEmbed)]
 #[folder = "fonts/"]
@@ -76,8 +76,8 @@ fn create_font_matrix(filename: &str) -> FontMatrix {
     fm
 }
 
-pub fn display(text: &str, font_size: usize, fl: &FontLibrary) {
-    println!("{}", color::Fg(color::Red));
+pub fn display(text: &str, font_size: usize, c: &Box<dyn color::Color>, fl: &FontLibrary) {
+    println!("{}", color::Fg(c.as_ref()));
     for l in 0..font_size {
         for c in text.chars() {
             let fm = fl.font_matrix(font_size, c);
@@ -99,17 +99,15 @@ fn show_line(line: usize, fm: &FontMatrix) {
     }
 }
 
-pub fn clear() {
-    // print!("\x1B[2J\x1B[1;1H")
-    print!("{}{}{}", clear::All, cursor::Goto(1, 1), cursor::Hide);
-}
-
 #[cfg(test)]
 mod tests {
+    use crate::term::get_color;
+
     #[test]
     fn test_display() {
         let font_library = super::FontLibrary::new();
-        super::display("12:34", 5, &font_library);
+        let c = get_color("red");
+        super::display("12:34", 5, &c, &font_library);
     }
 
     #[test]
